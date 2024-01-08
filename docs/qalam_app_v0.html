@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://fontlibrary.org//face/droid-arabic-naskh" media="screen" rel="stylesheet" type="text/css"/>
+    <style>
+
+        body {
+            font-family: "DroidArabicNaskhRegular", serif;
+        }
+
+        table, td {
+            border: 1px solid black;
+            padding: 10px;
+            font-size: 5vw;
+        }
+
+        span {
+            display: table-cell;
+            vertical-align: bottom;
+            padding-top: 5%;
+            font-size: 40vw;
+        }
+
+        .container {
+            display: table;
+            height: 100%;
+            width: 100%;
+            text-align: center;
+            margin-top: 15%;
+        }
+
+
+        .unselectable {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .vowelCheckBoxes {
+            display: none;
+        }
+
+        .letter:checked ~ .vowelCheckBoxes {
+            display: block;
+            margin-left: 20px;
+        }
+
+        #_display {
+            font-size: 40vw
+        }
+
+        #configForm {
+            text-align: left;
+        }
+
+    </style>
+    <title>Qalam App V0</title>
+
+</head>
+
+
+<body>
+<div class="container">
+    <span class="unselectable" hidden="hidden" id="_display" onclick="next();"></span>
+
+    <form dir="ltr" id="configForm" lang="en-Us" onsubmit="setConfig()">
+        <fieldset>
+            <div>
+                <input autocomplete="off" class="letter" id="letter_order" name="subject" type="radio"
+                       value="letter_order"/>
+                <label for="letter_order">Letter Order</label>
+                <div class="vowelCheckBoxes">
+                    <input autocomplete="off" id="order_short" name="vowels" type="checkbox" value="short">
+                    <label for="order_short">Short Vowels</label>
+                    <input autocomplete="off" id="order_nunation" name="vowels" type="checkbox" value="nunation">
+                    <label for="order_nunation">Nunation</label>
+                    <input autocomplete="off" id="order_long" name="vowels" type="checkbox" value="long">
+                    <label for="order_long">Long Vowels</label>
+                </div>
+            </div>
+            <div>
+                <input autocomplete="off" class="letter" id="letter_random" name="subject" type="radio"
+                       value="letter_random"/>
+                <label for="letter_random">Letter Random</label>
+                <div class="vowelCheckBoxes">
+                    <input autocomplete="off" id="random_short" name="vowels" type="checkbox" value="short">
+                    <label for="random_short">Short Vowels</label>
+                    <input autocomplete="off" id="random_nunation" name="vowels" type="checkbox" value="nunation">
+                    <label for="random_nunation">Nunation</label>
+                    <input autocomplete="off" id="random_long" name="vowels" type="checkbox" value="long">
+                    <label for="random_long">Long Vowels</label>
+                </div>
+            </div>
+            <div>
+                <input autocomplete="off" id="form_order" name="subject" type="radio" value="form_order"/>
+                <label for="form_order">Form Order</label>
+            </div>
+            <div>
+                <input autocomplete="off" id="form_random" name="subject" type="radio" value="form_random"/>
+                <label for="form_random">Form Random</label>
+            </div>
+            <div>
+                <input autocomplete="off" id="all" name="subject" type="radio" value="all"/>
+                <label for="all">All</label>
+            </div>
+            <div>
+                <button type="submit">Submit</button>
+            </div>
+        </fieldset>
+    </form>
+</div>
+</body>
+<script>
+
+    const subjectType = {
+        letter: "letter",
+        form: "form",
+        all: "all"
+    };
+
+    const modeType = {
+        order: "order",
+        random: "random",
+    };
+
+    let config;
+
+    function setConfig() {
+        let selectedSubject = document.querySelector('input[name="subject"]:checked').value;
+        let vowelsCheckBoxes = document.getElementsByName("vowels");
+        let selectedCheckboxes = Array.prototype.slice.call(vowelsCheckBoxes)
+            .filter(ch => ch.checked === true).map(ch => ch.value);
+        inputToConfig(selectedSubject, selectedCheckboxes);
+    }
+
+    function inputToConfig(selectedSubject, selectedCheckboxes) {
+        let selectedSubjectType;
+        let selectedModeType;
+        let shortVowelChecked = selectedCheckboxes.includes("short");
+        let nunationVowelChecked = selectedCheckboxes.includes("nunation");
+        let longVowelChecked = selectedCheckboxes.includes("long");
+
+        switch (selectedSubject) {
+            case "letter_order":
+                selectedSubjectType = subjectType.letter;
+                selectedModeType = modeType.order;
+                break;
+            case "letter_random":
+                selectedSubjectType = subjectType.letter;
+                selectedModeType = modeType.random;
+                break;
+            case "form_order":
+                selectedSubjectType = subjectType.form;
+                selectedModeType = modeType.order;
+                break;
+            case "form_random":
+                selectedSubjectType = subjectType.form;
+                selectedModeType = modeType.random;
+                break;
+            case "all":
+                selectedSubjectType = subjectType.all;
+                break;
+        }
+
+        config = {
+            subject: selectedSubjectType,
+            mode: selectedModeType,
+            vowelType: {
+                short: shortVowelChecked,
+                nunation: nunationVowelChecked,
+                long: longVowelChecked,
+            }
+
+        };
+
+        displayFirstElement();
+    }
+
+    const display = document.getElementById("_display");
+    const configForm = document.getElementById("configForm");
+    const extensionLength = 3
+    const data =
+        {
+            "title": "Arabic Unicode Characters Version 15.1.0",
+            "letters": ["0623", "0628", "062A", "062B", "062C", "062D", "062E", "062F", "0630", "0631", "0632", "0633", "0634", "0635", "0636", "0637", "0638", "0639", "063A", "0641", "0642", "0643", "0644", "0645", "0646", "0647", "0648", "064A"],
+            "vowels": {
+                "short": ["064E", "064F", "0650", "0652"],
+                "nunation": ["064B", "064C", "064D"],
+                "long": ["0627", "0648", "064A"],
+            },
+            "no_join_after": ["0623", "062F", "0630", "0631", "0632", "0648"],
+            "namedCharacters": {
+                "tatweel": "0640",
+                "alif": "0627",
+                "alif_hamza_above": "0623",
+                "alif_hamza_below": "0625",
+                "waw": "0648",
+                "yaa": "064A",
+                "fatha": "064E",
+                "damma": "064F",
+                "kasra": "0650",
+                "fathatan": "064B",
+                "space": "&nbsp;",
+                "pipe": "007C"
+            }
+        }
+
+    let letterIndex = 0;
+    let vowelIndex = 0;
+
+    const letters = data.letters
+    let vowels;
+
+    function determineVowels() {
+        let result = []
+
+        if (config.vowelType.short) {
+            result.push(...data.vowels.short);
+        }
+
+        if (config.vowelType.nunation) {
+            result.push(...data.vowels.nunation);
+        }
+
+        if (config.vowelType.long) {
+            result.push(...data.vowels.long);
+        }
+        console.log(result)
+        return result
+    }
+
+    function setDisplay(html, fontSize = "40vw") {
+        display.style.fontSize = fontSize;
+        display.innerHTML = html;
+    }
+
+    function clearDisplay() {
+        display.innerHTML = "";
+    }
+
+    function toHTMLEntity(code_point) {
+        if (code_point == null || code_point === "") {
+            return ""
+        }
+        return `&#x${code_point};`
+    }
+
+    function toInitialForm(code_point) {
+        const letter = toHTMLEntity(code_point);
+        const extension = toHTMLEntity(data.namedCharacters.tatweel).repeat(extensionLength);
+
+        if (data.no_join_after.includes(code_point)) {
+            return letter
+        }
+
+        return letter + extension;
+    }
+
+    function toMedialForm(code_point) {
+        const letter = toHTMLEntity(code_point);
+        const extension = toHTMLEntity(data.namedCharacters.tatweel).repeat(extensionLength);
+
+        if (data.no_join_after.includes(code_point)) {
+            return extension + letter
+        }
+        return extension + letter + extension;
+    }
+
+    function toFinalForm(code_point) {
+        const letter = toHTMLEntity(code_point);
+        const extension = toHTMLEntity(data.namedCharacters.tatweel).repeat(extensionLength);
+        return extension + letter;
+
+    }
+
+    function next() {
+        if (config.subject === subjectType.letter) {
+            if (config.mode === modeType.random) {
+                randomLetter()
+            } else {
+                nextLetter()
+            }
+        } else if (config.subject === subjectType.form) {
+            if (config.mode === modeType.random) {
+                randomLetterForm()
+            } else {
+                nextLetterForms()
+            }
+        } else {
+            displayAll()
+        }
+    }
+
+    function nextLetter() {
+        if (vowels.length === 0) {
+            letterIndex = (letterIndex + 1) % (letters.length); // next letter
+        } else {
+            if (vowelIndex === (vowels.length - 1)) {
+                letterIndex = (letterIndex + 1) % (letters.length); // next letter
+                vowelIndex = 0 // first vowel
+            } else {
+                vowelIndex = (vowelIndex + 1) % (vowels.length); // next vowel
+            }
+        }
+        printLetter(letters[letterIndex], vowels[vowelIndex])
+    }
+
+    function randomLetter() {
+        let randomLetter = letters[Math.floor(Math.random() * letters.length)];
+        let randomVowel = vowels.length === 0 ? null : vowels[Math.floor(Math.random() * vowels.length)];
+
+        printLetter(randomLetter, randomVowel)
+    }
+
+    function nextLetterForms() {
+        letterIndex = (letterIndex + 1) % (letters.length);
+        printForms(letters[letterIndex])
+    }
+
+    function printForms(letter_code_point) {
+        const isolated = toHTMLEntity(letter_code_point)
+        const initial = toInitialForm(letter_code_point)
+        const medial = toMedialForm(letter_code_point)
+        const final = toFinalForm(letter_code_point)
+
+        html = isolated
+            + toHTMLEntity(data.namedCharacters.pipe)
+            + initial
+            + data.namedCharacters.space
+            + medial
+            + data.namedCharacters.space
+            + final
+
+        setDisplay(html, "10vw")
+    }
+
+    function randomLetterForm() {
+        const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+        let randomFormIndex = Math.floor(Math.random() * 4)
+
+        switch (randomFormIndex) {
+            case 0:
+                printLetter(randomLetter, null);
+                break;
+            case 1:
+                setDisplay(toInitialForm(randomLetter));
+                break;
+            case 2:
+                setDisplay(toMedialForm(randomLetter));
+                break;
+            case 3:
+                setDisplay(toFinalForm(randomLetter));
+                break;
+            default:
+                printLetter(randomLetter, null);
+        }
+
+    }
+
+    function makeLetterTable() {
+        const table = document.createElement('table');
+        const header = table.createTHead();
+        const headerRow = header.insertRow(0);
+        headerRow.insertCell(0).innerHTML = "isolated";
+        headerRow.insertCell(1).innerHTML = "initial";
+        headerRow.insertCell(2).innerHTML = "medial";
+        headerRow.insertCell(3).innerHTML = "final";
+
+        for (let letter of data.letters) {
+            const currentRow = table.insertRow();
+            currentRow.insertCell().innerHTML = toHTMLEntity(letter);
+            currentRow.insertCell().innerHTML = toInitialForm(letter);
+            currentRow.insertCell().innerHTML = toMedialForm(letter);
+            currentRow.insertCell().innerHTML = toFinalForm(letter);
+        }
+
+        document.body.appendChild(table);
+        document.body.appendChild(document.createElement("br"));
+    }
+
+    function makeVowelTable(vowelType, vowels) {
+        const table = document.createElement('table');
+        const header = table.createTHead();
+        const headerRow = header.insertRow(0);
+        headerRow.insertCell(0).innerHTML = `${vowelType} vowel`;
+
+
+        for (let vowel of vowels) {
+            const currentRow = table.insertRow();
+            const extension = toHTMLEntity(data.namedCharacters.tatweel).repeat(extensionLength);
+            currentRow.insertCell().innerHTML = extension + toHTMLEntity(vowel);
+        }
+
+        document.body.appendChild(table);
+        document.body.appendChild(document.createElement("br"));
+    }
+
+    function displayAll() {
+        clearDisplay()
+        makeLetterTable()
+        makeVowelTable("short", data.vowels.short)
+        makeVowelTable("nunation", data.vowels.nunation)
+        makeVowelTable("long", data.vowels.long)
+    }
+
+    function printLetter(letter_code_point, vowel_code_point) {
+        const namedCharacters = data.namedCharacters;
+
+        if (letter_code_point === namedCharacters.alif_hamza_above && vowel_code_point === namedCharacters.kasra) {
+            setDisplay(toHTMLEntity(namedCharacters.alif_hamza_below) + toHTMLEntity(vowel_code_point));
+        } else if (letter_code_point === namedCharacters.alif_hamza_above && data.vowels.nunation.includes(vowel_code_point)) {
+            next()
+        } else if (vowel_code_point === namedCharacters.fathatan) {
+            setDisplay(toHTMLEntity(letter_code_point) + toHTMLEntity(namedCharacters.alif) + toHTMLEntity(vowel_code_point));
+        } else if (data.vowels.long.includes(vowel_code_point)) {
+            let prefixVowel;
+            if (vowel_code_point === namedCharacters.alif) {
+                prefixVowel = namedCharacters.fatha;
+            } else if (vowel_code_point === namedCharacters.waw) {
+                prefixVowel = namedCharacters.damma;
+            } else if (vowel_code_point === namedCharacters.yaa) {
+                prefixVowel = namedCharacters.kasra;
+            }
+
+            if (letter_code_point === namedCharacters.alif_hamza_above && vowel_code_point === namedCharacters.alif) {
+                next()
+            } else if (letter_code_point === namedCharacters.alif_hamza_above && vowel_code_point === namedCharacters.yaa) {
+                setDisplay(toHTMLEntity(namedCharacters.alif_hamza_below) + toHTMLEntity(prefixVowel) + toHTMLEntity(vowel_code_point));
+            } else {
+                setDisplay(toHTMLEntity(letter_code_point) + toHTMLEntity(prefixVowel) + toHTMLEntity(vowel_code_point));
+            }
+        } else {
+            setDisplay(toHTMLEntity(letter_code_point) + toHTMLEntity(vowel_code_point));
+        }
+    }
+
+    function displayFirstElement() {
+        vowels = determineVowels()
+        display.hidden = false;
+        configForm.remove();
+        if (config.subject === subjectType.all) {
+            displayAll()
+        } else {
+            if (config.mode === modeType.order) {
+                if (config.subject === subjectType.form) {
+                    printForms(letters[0])
+                } else {
+                    printLetter(letters[0], vowels[0])
+                }
+            } else {
+                next()
+            }
+        }
+    }
+
+</script>
+</html>
