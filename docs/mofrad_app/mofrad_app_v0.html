@@ -152,17 +152,56 @@
         .hidden {
             display: none;
         }
+
+        .unicorn-container {
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .unicorn {
+            font-size: 120px;
+            animation: dance 1s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+            cursor: pointer;
+            user-select: none;
+        }
+
+
+        @keyframes dance {
+            0%, 100% {
+                transform: rotate(-5deg) scale(1);
+            }
+            25% {
+                transform: rotate(5deg) scale(1.1);
+            }
+            50% {
+                transform: rotate(-5deg) scale(1);
+            }
+            75% {
+                transform: rotate(5deg) scale(1.1);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-30px);
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Arabisch - Nederlands</h1>
     <div class="score">Score: <span id="score">0</span> / <span id="total">0</span></div>
-
     <div class="question-box">
         <div class="arabic-word" id="arabicWord">...</div>
     </div>
-
+    <div id="unicorn-container" class="unicorn-container hidden">
+        <div class="unicorn">🦄</div>
+    </div>
     <div class="feedback" id="feedback"></div>
 
     <div class="answers" id="answers">
@@ -218,6 +257,7 @@
     }
 
     function nextQuestion() {
+        hideUnicorn()
         if (words.length === 0) return;
 
         document.getElementById('nextBtn').classList.add('hidden');
@@ -254,6 +294,7 @@
             buttons[selected].classList.add('correct');
             document.getElementById('feedback').textContent = '✓ Goed!';
             document.getElementById('feedback').className = 'feedback correct';
+            if(score % 2 === 0) showUnicorn();
         } else {
             buttons[selected].classList.add('incorrect');
             buttons[correctAnswer].classList.add('correct');
@@ -262,6 +303,14 @@
         }
 
         document.getElementById('nextBtn').classList.remove('hidden');
+    }
+
+    function showUnicorn(){
+        document.getElementById('unicorn-container').classList.remove('hidden');
+    }
+
+    function hideUnicorn(){
+        document.getElementById('unicorn-container').classList.add('hidden');
     }
 
     loadWords();
