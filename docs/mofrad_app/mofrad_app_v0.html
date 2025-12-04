@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Arabisch Leren</title>
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/droid-arabic-naskh');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .question-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arabic-word {
+            font-size: 72px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-family: 'Droid Arabic Naskh', sans-serif;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            background: #f0f0f0;
+            border: 3px solid #e0e0e0;
+            padding: 20px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .answer-btn:hover {
+            background: #e8e8e8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .answer-btn:active {
+            transform: translateY(0);
+        }
+
+        .answer-btn.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #45a049;
+        }
+
+        .answer-btn.incorrect {
+            background: #f44336;
+            color: white;
+            border-color: #da190b;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 30px;
+            margin-bottom: 15px;
+        }
+
+        .feedback.correct {
+            color: #4caf50;
+        }
+
+        .feedback.incorrect {
+            color: #f44336;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .next-btn:active {
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Arabisch - Nederlands</h1>
+    <div class="score">Score: <span id="score">0</span> / <span id="total">0</span></div>
+
+    <div class="question-box">
+        <div class="arabic-word" id="arabicWord">...</div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="answers" id="answers">
+        <button class="answer-btn" onclick="checkAnswer(0)"></button>
+        <button class="answer-btn" onclick="checkAnswer(1)"></button>
+        <button class="answer-btn" onclick="checkAnswer(2)"></button>
+        <button class="answer-btn" onclick="checkAnswer(3)"></button>
+    </div>
+
+    <button class="next-btn hidden" id="nextBtn" onclick="nextQuestion()">Volgende</button>
+</div>
+
+<script>
+    let words = [];
+    let currentWord = null;
+    let correctAnswer = null;
+    let score = 0;
+    let total = 0;
+
+    function parseCSV(text) {
+        const lines = text.trim().split('\n');
+        const headers = lines[0].split(',');
+        const data = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',');
+            const obj = {};
+            headers.forEach((header, index) => {
+                obj[header.trim()] = values[index].trim();
+            });
+            data.push(obj);
+        }
+
+        return data;
+    }
+
+    async function loadWords() {
+        try {
+            const response = await fetch('words.csv');
+            const csvText = await response.text();
+            words = parseCSV(csvText);
+            nextQuestion();
+        } catch (error) {
+            console.error('Error loading words:', error);
+            document.getElementById('arabicWord').textContent = 'Error loading words!';
+        }
+    }
+
+    function getRandomWords(exclude, count) {
+        const available = words.filter(w => w !== exclude);
+        const shuffled = available.sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count);
+    }
+
+    function nextQuestion() {
+        if (words.length === 0) return;
+
+        document.getElementById('nextBtn').classList.add('hidden');
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('feedback').className = 'feedback';
+
+        currentWord = words[Math.floor(Math.random() * words.length)];
+        document.getElementById('arabicWord').textContent = currentWord.arabic;
+
+        const wrongAnswers = getRandomWords(currentWord, 3);
+        const allAnswers = [...wrongAnswers, currentWord];
+
+        const shuffled = allAnswers.sort(() => Math.random() - 0.5);
+        correctAnswer = shuffled.indexOf(currentWord);
+
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach((btn, index) => {
+            btn.textContent = shuffled[index].dutch;
+            btn.disabled = false;
+            btn.className = 'answer-btn';
+        });
+    }
+
+    function checkAnswer(selected) {
+        total++;
+        document.getElementById('total').textContent = total;
+
+        const buttons = document.querySelectorAll('.answer-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (selected === correctAnswer) {
+            score++;
+            document.getElementById('score').textContent = score;
+            buttons[selected].classList.add('correct');
+            document.getElementById('feedback').textContent = '✓ Goed!';
+            document.getElementById('feedback').className = 'feedback correct';
+        } else {
+            buttons[selected].classList.add('incorrect');
+            buttons[correctAnswer].classList.add('correct');
+            document.getElementById('feedback').textContent = '✗ Fout!';
+            document.getElementById('feedback').className = 'feedback incorrect';
+        }
+
+        document.getElementById('nextBtn').classList.remove('hidden');
+    }
+
+    loadWords();
+</script>
+</body>
+</html>
