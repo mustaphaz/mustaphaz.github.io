@@ -238,9 +238,9 @@
 </head>
 <body>
 <div class="container">
-    <h1>Taybe Groep 5 Woordjes</h1>
+    <h1>Tayba Groep 5 Woordjes</h1>
     <div class="select-container" id="select-container">
-        <h1>Kies een Hoofdstuk</h1>
+        <h1>Kies een Deel</h1>
         <div class="button-grid" id="buttonContainer"></div>
     </div>
     <div class="game-container hidden" id="game-container">
@@ -274,8 +274,8 @@
     let score = 0;
     let total = 0;
     let themes = [
-        {fileName: "class5_part1", displayName: "Hoofdstuk 1"},
-        {fileName: "class5_part2", displayName: "Hoofdstuk 2"},
+        {fileName: "class5_part1", displayName: "Groep 5-Deel 1"},
+        {fileName: "class5_part2", displayName: "Groep 5-Deel 2"},
     ]
 
     function parseCSV(text) {
@@ -298,9 +298,21 @@
     async function loadWords(theme) {
         console.log('Selected theme:' + theme)
         try {
-            const response = await fetch('words/' + theme + '.csv');
-            const csvText = await response.text();
-            words = parseCSV(csvText);
+            if (theme === 'all') {
+                const collectedWords = []
+                for (let i = 0; i < themes.length; i++) {
+                    console.log('Loading filename: ' + themes[i].fileName)
+                    const response = await fetch('words/' + themes[i].fileName + '.csv');
+                    const csvText = await response.text();
+                    collectedWords.push(parseCSV(csvText));
+                    words = collectedWords.flat()
+                }
+            } else {
+                const response = await fetch('words/' + theme + '.csv');
+                const csvText = await response.text();
+                words = parseCSV(csvText);
+            }
+
             showGame()
             nextQuestion();
         } catch (error) {
@@ -394,6 +406,14 @@
     function createButtons() {
         const container = document.getElementById('buttonContainer');
         removeAllChildNodes(container)
+        const button = document.createElement('button');
+        button.className = 'number-button';
+        button.textContent = 'Groep 5 Alle woordjes';
+        button.onclick = () => {
+            loadWords('all');
+        };
+        container.appendChild(button);
+
         for (let i = 0; i < themes.length; i++) {
             const button = document.createElement('button');
             button.className = 'number-button';
