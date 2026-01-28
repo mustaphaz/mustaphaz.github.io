@@ -269,10 +269,12 @@
 
 <script>
     let words = [];
+    let wordsToGuess = [];
     let currentWord = null;
     let correctAnswer = null;
     let score = 0;
     let total = 0;
+    let totalWords = 0;
     let themes = [
         {fileName: "class5_part1", displayName: "Groep 5-Deel 1"},
         {fileName: "class5_part2", displayName: "Groep 5-Deel 2"},
@@ -306,11 +308,15 @@
                     const csvText = await response.text();
                     collectedWords.push(parseCSV(csvText));
                     words = collectedWords.flat()
+                    wordsToGuess = words
+                    totalWords = wordsToGuess.length
                 }
             } else {
                 const response = await fetch('words/' + theme + '.csv');
                 const csvText = await response.text();
                 words = parseCSV(csvText);
+                wordsToGuess = parseCSV(csvText);
+                totalWords = wordsToGuess.length
             }
 
             showGame()
@@ -354,7 +360,7 @@
 
     function checkAnswer(selected) {
         total++;
-        document.getElementById('total').textContent = total;
+        document.getElementById('total').textContent = totalWords;
 
         const buttons = document.querySelectorAll('.answer-btn');
         buttons.forEach(btn => btn.disabled = true);
@@ -366,6 +372,10 @@
             document.getElementById('feedback').textContent = '✓ Goed!';
             document.getElementById('feedback').className = 'feedback correct';
             if (score % 5 === 0) showUnicorn();
+            // remove correct word from list
+            const index = wordsToGuess.indexOf(correctAnswer);
+            wordsToGuess.splice(index, 1);
+            console.log("removing element: ", correctAnswer)
         } else {
             buttons[selected].classList.add('incorrect');
             buttons[correctAnswer].classList.add('correct');
